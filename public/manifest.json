@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "EzCopy - Clipboard Manager",
+  "version": "1.0.0",
+  "description": "Capture copied text from pages, view and manage via popup.",
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "EzCopy"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "storage",
+    "clipboardWrite",
+    "clipboardRead"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
