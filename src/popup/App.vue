@@ -1,91 +1,77 @@
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import Header from '../components/Header.vue'
+import ListItem from "../components/ListItem.vue";
+const items = ref([])
+const query = ref('')
+const msg = ref('')
+
+const load = () => {
+  chrome.storage.local.get(['ezcopy_items'], (res) => {
+    items.value = res.ezcopy_items || []
+  })
+}
+
+const refresh = () => {
+  load()
+  msg.value = 'Refreshed'
+  setTimeout(()=> msg.value='',800)
+}
+
+
+
+const clearAll = () => {
+  chrome.storage.local.set({ezcopy_items: []}, () => {
+    load()
+  })
+}
+
+onMounted(() => {
+  load()
+  // listen to storage changes to update UI realtime
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (changes.ezcopy_items) {
+      items.value = changes.ezcopy_items.newValue || []
+    }
+  })
+})
+
+const filtered = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return items.value.slice().reverse()
+  return items.value.filter(i => i.text.toLowerCase().includes(q)).reverse()
+})
+
+</script>
+
 <template>
-  <div style="font-family: Arial; padding: 12px; width: 360px;">
-    <h3>EzCopy</h3>
-    <input v-model="query" placeholder="Search..." style="width:100%; padding:6px; margin-bottom:8px;" />
-    <div v-if="items.length === 0" style="color:#666; padding:8px;">No items yet. Copy text on any page to capture.</div>
-    <ul style="list-style:none; padding:0; margin:0;">
-      <li v-for="item in filtered" :key="item.id" style="padding:8px; border-bottom:1px solid #eee; display:flex; gap:8px; align-items:flex-start;">
-        <div style="flex:1; word-break:break-word; max-height:64px; overflow:auto;">{{ JSON.stringify(item) }}</div>
-       <div style="display:flex; flex-direction:column; gap:6px;">
-          <button @click="copyItem(item.text)" title="Copy to clipboard">Copy</button>
-          <button @click="deleteItem(item.id)" title="Delete">Del</button>
+  <div class="w-[600px] h-[550px] bg-white shadow-xl flex flex-col overflow-hidden">
+    <Header :modelValue="query" @update:modelValue="query = $event" />
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div class="flex justify-between items-center mb-3">
+        <div class="text-sm font-medium text-gray-700">Your Clipboard Items</div>
+        <div class="flex space-x-2">
+          <button class="flex items-center px-3 py-1.5 text-xs font-medium rounded-lg bg-white text-red-600 border border-red-200 hover:bg-red-50 transition-all duration-200">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Clear all
+          </button>
+          <button class="flex items-center px-3 py-1.5 text-xs font-medium rounded-lg bg-white text-primary-600 border border-primary-200 hover:bg-primary-50 transition-all duration-200">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add new
+          </button>
         </div>
-      </li>
-    </ul>
-    <div style="margin-top:8px; display:flex; gap:8px;">
-      <button @click="clearAll" :disabled="items.length===0">Clear All</button>
-      <button @click="refresh">Refresh</button>
-    </div>
-    <p v-if="msg" style="margin-top:8px;">{{ msg }}</p>
+      </div>
+      <template v-for="(item, index) in filtered" :key="item.id">
+        <ListItem
+          :item="item"
+        />
+      </template>
+     </div>
   </div>
 </template>
-
-<script>
-import { ref, onMounted, computed } from 'vue'
-
-export default {
-  setup() {
-    const items = ref([])
-    const query = ref('')
-    const msg = ref('')
-
-    const load = () => {
-      chrome.storage.local.get(['ezcopy_items'], (res) => {
-        items.value = res.ezcopy_items || []
-      })
-    }
-
-    const refresh = () => {
-      load()
-      msg.value = 'Refreshed'
-      setTimeout(()=> msg.value='',800)
-    }
-
-    const copyItem = async (text) => {
-      try {
-        await navigator.clipboard.writeText(text)
-        msg.value = 'Copied to clipboard'
-      } catch (e) {
-        // fallback: send to background to copy via execScript if needed
-        chrome.runtime.sendMessage({type:'COPY_TO_CLIPBOARD', text})
-        msg.value = 'Requested copy'
-      }
-      setTimeout(()=> msg.value='',1000)
-    }
-
-    const deleteItem = (id) => {
-      chrome.storage.local.get(['ezcopy_items'], (res) => {
-        const arr = res.ezcopy_items || []
-        const next = arr.filter(i => i.id !== id)
-        chrome.storage.local.set({ezcopy_items: next}, () => {
-          load()
-        })
-      })
-    }
-
-    const clearAll = () => {
-      chrome.storage.local.set({ezcopy_items: []}, () => {
-        load()
-      })
-    }
-
-    onMounted(() => {
-      load()
-      // listen to storage changes to update UI realtime
-      chrome.storage.onChanged.addListener((changes, area) => {
-        if (changes.ezcopy_items) {
-          items.value = changes.ezcopy_items.newValue || []
-        }
-      })
-    })
-
-    const filtered = computed(() => {
-      const q = query.value.trim().toLowerCase()
-      if (!q) return items.value.slice().reverse()
-      return items.value.filter(i => i.text.toLowerCase().includes(q)).reverse()
-    })
-
-    return { items, query, msg, copyItem, deleteItem, clearAll, refresh, filtered }
-  }
-}
-</script>
