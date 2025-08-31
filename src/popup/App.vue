@@ -3,32 +3,32 @@
 import { ref, onMounted, computed } from 'vue'
 import Header from '../components/Header.vue'
 import ListItem from "../components/ListItem.vue";
+import FilterNotFound from "../components/notFound/FilterNotFound.vue";
 const items = ref([])
 const query = ref('')
 const msg = ref('')
 
-const load = () => {
+const loadClipboardItems = () => {
   chrome.storage.local.get(['ezcopy_items'], (res) => {
     items.value = res.ezcopy_items || []
   })
 }
 
 const refresh = () => {
-  load()
+  loadClipboardItems()
   msg.value = 'Refreshed'
   setTimeout(()=> msg.value='',800)
 }
 
 
-
 const clearAll = () => {
   chrome.storage.local.set({ezcopy_items: []}, () => {
-    load()
+    loadClipboardItems()
   })
 }
 
 onMounted(() => {
-  load()
+  loadClipboardItems()
   // listen to storage changes to update UI realtime
   chrome.storage.onChanged.addListener((changes, area) => {
     if (changes.ezcopy_items) {
@@ -42,6 +42,8 @@ const filtered = computed(() => {
   if (!q) return items.value.slice().reverse()
   return items.value.filter(i => i.text.toLowerCase().includes(q)).reverse()
 })
+
+const isNotFound = computed(() => !items.value.length || (query.value.length > 0 && !filtered.value.length))
 
 </script>
 
@@ -72,6 +74,7 @@ const filtered = computed(() => {
           :item="item"
         />
       </template>
+      <FilterNotFound v-if="isNotFound" :query="query" @clearFilter="query = ''"/>
      </div>
   </div>
 </template>
