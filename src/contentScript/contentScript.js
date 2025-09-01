@@ -36,6 +36,7 @@
         try {
           // selection
           const sel = window.getSelection ? window.getSelection().toString() : "";
+          console.log("text:", sel);
           if (sel) text = sel;
 
           // clipboardData
@@ -52,6 +53,7 @@
           navigator.clipboard
               .readText()
               .then((t) => {
+                  console.log("text1:", t);
                 if (t) sendCopied(t);
               })
               .catch(() => {
@@ -72,7 +74,4 @@
     if (sel) sendCopied(sel);
   });
 
-  // ⚠️ Removed keydown handler:
-  // কারণ "copy" ইভেন্ট নিজেই সব কভার করে দেয়।
-  // keydown রাখলে duplicate হবে।
 })();

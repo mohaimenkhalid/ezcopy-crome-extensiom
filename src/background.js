@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const text = message.clip.text && message.clip.text.toString();
     if (!text) {
       sendResponse({ success: false, reason: "empty text" });
-      return true; // connection open রাখো
+      return true; // connection open
     }
 
     chrome.storage.local.get(['ezcopy_items'], (res) => {
