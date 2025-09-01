@@ -40,6 +40,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       while (arr.length > MAX_ITEMS) arr.shift();
 
       chrome.storage.local.set({ ezcopy_items: arr });
+      sendResponse({ success: true });
     });
 
   } else if (message?.type === 'COPY_TO_CLIPBOARD') {

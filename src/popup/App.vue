@@ -14,13 +14,6 @@ const loadClipboardItems = () => {
   })
 }
 
-const refresh = () => {
-  loadClipboardItems()
-  msg.value = 'Refreshed'
-  setTimeout(()=> msg.value='',800)
-}
-
-
 const clearAll = () => {
   if (confirm('Sure to clear all clips?')) {
     chrome.storage.local.set({ezcopy_items: []}, () => {

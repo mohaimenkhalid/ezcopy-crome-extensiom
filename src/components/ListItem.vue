@@ -19,13 +19,13 @@
   const copyItem = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      msg.value = 'Copied to clipboard'
+      // msg.value = 'Copied to clipboard'
     } catch (e) {
       // fallback: send to background to copy via execScript if needed
       chrome.runtime.sendMessage({type:'COPY_TO_CLIPBOARD', text})
-      msg.value = 'Requested copy'
+      // msg.value = 'Requested copy'
     }
-    setTimeout(()=> msg.value='',1000)
+    // setTimeout(()=> msg.value='',1000)
   }
 
   const deleteItem = (id) => {
