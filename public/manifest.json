@@ -8,7 +8,8 @@
     "default_title": "EzCopy"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "permissions": [
     "scripting",
@@ -28,5 +29,13 @@
   ],
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "commands": {
+    "read_clipboard": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      },
+      "description": "Read clipboard and save text"
+    }
+  }
 }

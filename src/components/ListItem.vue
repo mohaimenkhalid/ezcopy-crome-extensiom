@@ -32,16 +32,14 @@
     chrome.storage.local.get(['ezcopy_items'], (res) => {
       const arr = res.ezcopy_items || []
       const next = arr.filter(i => i.id !== id)
-      chrome.storage.local.set({ezcopy_items: next}, () => {
-        load()
-      })
+      chrome.storage.local.set({ezcopy_items: next}, () => {})
     })
   }
 
 </script>
 
 <template>
-  <div class="flex items-start p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md hover:border-primary-200 transition-all duration-200 group">
+  <div class="no-select flex items-start p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md hover:border-primary-200 transition-all duration-200 group">
     <div class="flex-1 min-w-0">
       <p class="text-gray-900 text-sm font-medium text-truncate group-hover:text-primary-800 transition-colors duration-200">
         {{item.text}}
@@ -98,5 +96,11 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+}
+.no-select {
+  user-select: none; /* modern browsers */
+  -webkit-user-select: none; /* Chrome, Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 </style>
