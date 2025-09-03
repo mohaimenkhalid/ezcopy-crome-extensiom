@@ -4,6 +4,7 @@ const MAX_ITEMS = 500;
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(['ezcopy_items'], res => {
     if (!res.ezcopy_items) chrome.storage.local.set({ ezcopy_items: [] });
+    setActionText(res.ezcopy_items);
   });
 });
 
@@ -25,6 +26,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       arr.push(message.clip);
       while (arr.length > MAX_ITEMS) arr.shift();
       chrome.storage.local.set({ ezcopy_items: arr }, () => sendResponse({ success: true }));
+      setActionText(arr);
     });
 
     return true;
@@ -62,3 +64,8 @@ chrome.commands.onCommand.addListener(command => {
     chrome.action.openPopup();
   }
 });
+
+const setActionText = (arr) => {
+  chrome.action.setBadgeText({ text: arr.length.toString() });
+  chrome.action.setBadgeBackgroundColor({ color: "#ed3939" })
+}

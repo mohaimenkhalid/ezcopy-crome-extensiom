@@ -16,8 +16,6 @@
             url: location.href,
             time: Date.now(),
         };
-        console.log("clip", clip);
-
         chrome.runtime.sendMessage({ type: "NEW_COPY", clip }, (response) => {
             if (chrome.runtime.lastError) {
                 console.warn("Message failed:", chrome.runtime.lastError.message);

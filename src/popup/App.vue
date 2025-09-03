@@ -6,7 +6,6 @@ import ListItem from "../components/ListItem.vue";
 import FilterNotFound from "../components/notFound/FilterNotFound.vue";
 const items = ref([])
 const query = ref('')
-const msg = ref('')
 
 const loadClipboardItems = () => {
   chrome.storage.local.get(['ezcopy_items'], (res) => {
@@ -23,31 +22,31 @@ const clearAll = () => {
 }
 
 //get clipboard content from restricted pages
-const readClipboard = async () => {
-  try {
-    const text = await navigator?.clipboard?.readText()
-    if(!text) return
-
-    const clip = {
-      text,
-      url: '',
-      title: 'Clipboard Read',
-      time: Date.now(),
-      id: (Date.now().toString(36)+Math.random().toString(36).slice(2))
-    }
-
-    chrome.storage.local.get({ezcopy_items: []}, async (res) => {
-      const arr = res.ezcopy_items
-      const findText = arr.find((item) => item.text === text)
-      if (findText) return;
-      arr.push(clip)
-      while(arr.length > 500) arr.shift()
-      chrome.storage.local.set({ezcopy_items: arr}, () => loadClipboardItems())
-    })
-  } catch(e) {
-    alert('Clipboard read failed: ' + e)
-  }
-}
+// const readClipboard = async () => {
+//   try {
+//     const text = await navigator?.clipboard?.readText()
+//     if(!text) return
+//
+//     const clip = {
+//       text,
+//       url: '',
+//       title: 'Clipboard Read',
+//       time: Date.now(),
+//       id: (Date.now().toString(36)+Math.random().toString(36).slice(2))
+//     }
+//
+//     chrome.storage.local.get({ezcopy_items: []}, async (res) => {
+//       const arr = res.ezcopy_items
+//       const findText = arr.find((item) => item.text === text)
+//       if (findText) return;
+//       arr.push(clip)
+//       while(arr.length > 500) arr.shift()
+//       chrome.storage.local.set({ezcopy_items: arr}, () => loadClipboardItems())
+//     })
+//   } catch(e) {
+//     alert('Clipboard read failed: ' + e)
+//   }
+// }
 
 const listener = (changes, area) => {
   if (changes.ezcopy_items) {
@@ -58,7 +57,7 @@ const listener = (changes, area) => {
 
 onMounted(() => {
   loadClipboardItems()
-  setTimeout(() => readClipboard(), 500)
+  //setTimeout(() => readClipboard(), 500)
   // listen to storage changes to update UI realtime
   // chrome.storage.onChanged.addListener((changes, area) => {
   //   if (changes.ezcopy_items) {
